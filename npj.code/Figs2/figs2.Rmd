@@ -1,0 +1,79 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r cars}
+setwd("/Users/yangjianxia/Desktop/npj.code/Figs2")
+library(vegan)
+library(betapart)
+library(agricolae)
+library(ggplot2)
+library(ape)
+rm(list=ls())
+data0 <-read.csv("kaiju_arc_otu.csv",header = T,row.names = 1)
+da.rar <- t(data0)
+env <-read.csv("env.csv",header = T,row.names = 1)
+env$Nlevel<-as.factor(env$Nlevel)
+adonis2(da.rar~Nadd*Nlevel,data=env,permutations = 9999)
+
+set.seed(315)
+bac.pc<-pcoa(vegdist(decostand(da.rar,"hellinger"),"bray"))
+envpc<-data.frame( env, bac.pc$vectors)
+pc1=round(bac.pc$values$Relative_eig[1], 3)*100
+pc2=round(bac.pc$values$Relative_eig[2], 3)*100
+envpc$Nadd<-factor(envpc$Nadd,levels = c("Ncont","Ncess"))
+envpc$Nlevel<-factor(envpc$Nlevel,levels=c("0","2","5","10","15","20","50"),ordered = T)
+col11<-c("darkgrey","chartreuse","deepskyblue","darkviolet","darkorange","#CC0033","darkgoldenrod")
+lines<-c("Ncess"="solid","Ncont"="twodash")
+p1<-ggplot(data=envpc, aes(x= Axis.1 , y= Axis.2,color=Nlevel,linetype=Nadd,shape=Nadd))+  
+  geom_point(aes(colour=envpc$Nlevel,shape=envpc$Nadd),alpha = 0.8,size=10)+
+  stat_ellipse(aes( colour= Nlevel),level = 0.5, show.legend = T)+
+  scale_colour_manual(values=col11)+
+  scale_linetype_manual(values=lines,
+                        labels=c(expression(N[cont]),expression(N[cess])))+
+  labs(x = sprintf("PCo1 (%.1f%%)", pc1), y = sprintf("PCo2 (%.1f%%)", pc2))+
+  theme_bw()+guides(color=guide_legend(title= "Nlevel"))+
+  theme(text=element_text(size=16,  family="serif"))+
+  theme(text=element_text(size=20,  family="sans", face="bold"))+
+  theme(legend.title = element_text(colour="black", size=16, face="bold"),
+        legend.text = element_text(colour="black", size=16, face="bold"),
+        axis.text=element_text(size=16,face="bold"),
+        axis.title=element_text(size=16,face="bold"))
+p1
+ggsave("figs2a.kaiju_arc_pca.pdf",height = 6,width = 8)
+rm(list=ls())
+data0 <-read.csv("kaiju_bac_otu.csv",header = T,row.names = 1)
+da.rar <- t(data0)
+env <-read.csv("env.csv",header = T,row.names = 1)
+env$Nlevel<-as.factor(env$Nlevel)
+adonis2(da.rar~Nadd*Nlevel,data=env,permutations = 9999)
+set.seed(315)
+bac.pc<-pcoa(vegdist(decostand(da.rar,"hellinger"),"bray"))
+envpc<-data.frame( env, bac.pc$vectors)
+pc1=round(bac.pc$values$Relative_eig[1], 3)*100
+pc2=round(bac.pc$values$Relative_eig[2], 3)*100
+envpc$Nadd<-factor(envpc$Nadd,levels = c("Ncont","Ncess"))
+envpc$Nlevel<-factor(envpc$Nlevel,levels=c("0","2","5","10","15","20","50"),ordered = T)
+col11<-c("darkgrey","chartreuse","deepskyblue","darkviolet","darkorange","#CC0033","darkgoldenrod")
+lines<-c("Ncess"="solid","Ncont"="twodash")
+p2<-ggplot(data=envpc, aes(x= Axis.1 , y= Axis.2,color=Nlevel,linetype=Nadd,shape=Nadd))+  
+  geom_point(aes(colour=envpc$Nlevel,shape=envpc$Nadd),alpha = 0.8,size=10)+
+  stat_ellipse(aes( colour= Nlevel),level = 0.5, show.legend = T)+
+  scale_colour_manual(values=col11)+
+  scale_linetype_manual(values=lines,
+                        labels=c(expression(N[cont]),expression(N[cess])))+
+  labs(x = sprintf("PCo1 (%.1f%%)", pc1), y = sprintf("PCo2 (%.1f%%)", pc2))+
+  theme_bw()+guides(color=guide_legend(title= "Nlevel"))+
+  theme(text=element_text(size=16,  family="serif"))+
+  theme(text=element_text(size=20,  family="sans", face="bold"))+
+  theme(legend.title = element_text(colour="black", size=16, face="bold"),
+        legend.text = element_text(colour="black", size=16, face="bold"),
+        axis.text=element_text(size=16,face="bold"),
+        axis.title=element_text(size=16,face="bold"))
+p2
+ggsave("figs2b_kaiju_bac_pca.pdf",height = 6,width = 8)
+```
+

@@ -1,0 +1,1784 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+```{r,warning=FALSE}
+rm(list = ls())
+library(GO.db)
+library(vegan)
+library(permute)        
+library(lattice)
+library(WGCNA)
+library(igraph)
+library(brainGraph)
+library(psych)
+library(reshape2)
+library(igraph)
+library(Hmisc)
+library("GUniFrac")
+library(sciplot)
+library(ggpmisc)
+library(indicspecies)
+library(BiocManager)
+library(patchwork)
+library(agricolae)
+library(ggplot2)
+library(ggraph)
+library(colorRamps)
+library(multtest)
+#################################
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig5c.Figs16")
+rs<-read.csv("NN00.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order3<-data.frame(nd_order1)
+#write.csv(nd_order2,file = "nd_order2.csv")
+#nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+#write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+#igraph<-igraph[order(igraph[,igraph$igraph.weight]),]
+f_nd<-plot(g,main="Ncess-N0\n Positive links: 459\n Negative links: 129",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("NN02.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+nd_order3<-nd_order2
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+#write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+
+f_nd<-plot(g,main="Ncess-N2\n Positive links: 584\n Negative links: 118",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("NN05.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+#write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-nd_order2
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+#write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncess-N5\n Positive links: 441\n Negative links: 100",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("NN10.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+#write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-nd_order2
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncess-N10\n Positive links: 456\n Negative links: 66",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("NN15.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+nd_order3<-nd_order2
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+#write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncess-N15\n Positive links: 521\n Negative links: 106",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("NN20.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncess-N20\n Positive links: 401\n Negative links: 94",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("NN50.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncess-N50\n Positive links: 2437\n Negative links: 183",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN00.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N0\n Positive links: 474\n Negative links: 64",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN02.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N2\n Positive links: 495\n Negative links: 87",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN05.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N5\n Positive links: 471\n Negative links: 92",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN10.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N10\n Positive links: 419\n Negative links: 100",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN15.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N15\n Positive links: 757\n Negative links: 84",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN20.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N20\n Positive links: 473\n Negative links: 75",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+rs<-read.csv("YN50.csv",header=T,row.names = 1) 
+amfgroup<-read.csv("BACgroup.csv", header=TRUE)
+amfid<-read.csv("bac.ID.rarify.csv", header=TRUE)
+trsnd1<-t(rs)
+trsnd1<-data.frame(row.names(trsnd1),trsnd1)
+names(trsnd1)[1]<-c("OTU")
+nd<-merge(trsnd1,amfid,by="OTU")
+nd_order<-nd[order(nd$phylum),]
+nd_order1<-nd_order[-c(12,13:18)]
+nd_order2<-data.frame(nd_order1)
+write.csv(nd_order2,file = "nd_order2.csv")
+nd_order3<-read.csv("nd_order2.csv",header=T,row.names = 1) 
+############### non_degraded 
+df1<-nd_order3
+df1<-nd_order3[,-1]
+row.names(df1)<-nd_order3$OTU
+
+bac.coco<-t(df1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+sum(E(igraph)$weight>0)###number of postive correlation  
+sum(E(igraph)$weight<0)###number of negative correlation 
+
+
+tax = read.csv('bac.ID.rarify.csv', row.names=1, header=T)
+tax = tax[as.character(V(igraph)$name), ] 
+V(igraph)$phylum = tax$phylum
+node_list = data.frame(
+  label = names(V(igraph)),
+  phylum=V(igraph)$phylum) 
+write.graph(igraph, 'networkln.graphml', format = 'graphml')
+igraph.weight = E(igraph)$weight
+#E(igraph)$weight = NA
+sum(igraph.weight>0)
+sum(igraph.weight<0)
+E.color = igraph.weight
+E.color = ifelse(E.color>0, "#c2c2c2",ifelse(E.color<0, "#991f22","blue"))
+E(igraph)$color = as.character(E.color)
+set.seed(123)
+
+
+data2=read.csv("bac.ID.rarify.csv",header=T,row.names=1)
+data2<-data2[2]
+igraph_col = data2[V(igraph)$name,]
+igraph_col2=as.factor(igraph_col)
+levels(igraph_col2)
+
+vcol=data2$phylum
+vcol[vcol=="Actinobacteriota"]<-"#00ff7f"
+vcol[vcol=="Acidobacteriota"]<-"#ff0000"
+vcol[vcol=="Proteobacteria"]<-"#836fff"
+vcol[vcol=="Chloroflexi"]<-"#63b8ff"
+vcol[vcol=="Planctomycetota"]<-"#40e0d0"
+vcol[vcol=="Myxococcota"]<-"#9acd32"
+vcol[vcol=="Bacteroidota"]<-"#ffa54f"
+vcol[vcol=="Gemmatimonadota"]<-"#ff6347"
+vcol[vcol=="Patescibacteria"]<-"#0000ff"
+vcol[vcol=="Verrucomicrobiota"]<-"#ee82ee"
+vcol[vcol=="Firmicutes"]<-"#ffe1ff"
+vcol[vcol=="Methylomirabilota"]<-"#ffdab9"
+vcol[vcol=="Armatimonadota"]<-"#cd853f"
+vcol[vcol=="Entotheonellaeota"]<-"#cd853f"
+vcol[vcol=="Nitrospirota"]<-"#cd853f"
+vcol[vcol=="RCP2-54"]<-"#cd853f"
+vcol[vcol=="Abditibacteriota"]<-"#cd853f"
+vcol[vcol=="unclassified_k__norank_d__Bacteria"]<-"#cd853f"
+vcol[vcol=="WPS-2"]<-"#cd853f"
+vcol[vcol=="Elusimicrobiota"]<-"#cd853f"
+vcol[vcol=="Sumerlaeota"]<-"#cd853f"
+vcol[vcol=="Cyanobacteria"]<-"#cd853f"
+vcol[vcol=="Bdellovibrionota"]<-"#cd853f"
+vcol[vcol=="SAR324_cladeMarine_group_B"]<-"#cd853f"
+vcol[vcol=="Dependentiae"]<-"#cd853f"
+vcol[vcol=="Fibrobacterota"]<-"#cd853f"
+vcol[vcol=="Desulfobacterota"]<-"#cd853f"
+vcol[vcol=="Hydrogenedentes"]<-"#cd853f"
+vcol[vcol=="Latescibacterota"]<-"#cd853f"
+vcol[vcol=="WS2"]<-"#cd853f"
+vcol[vcol=="Deinococcota"]<-"#cd853f"
+vcol[vcol=="Fusobacteriota"]<-"#cd853f"
+vcol[vcol=="MBNT15"]<-"#cd853f"
+vcol[vcol=="NB1-j"]<-"#cd853f"
+vcol[vcol=="GAL15"]<-"#cd853f"
+vcol[vcol=="Dadabacteria"]<-"#cd853f"
+vcol[vcol=="FCPU426"]<-"#cd853f"
+vcol[vcol=="Campilobacterota"]<-"#cd853f"
+set.seed(123)
+color = c("#00ff7f","#ff0000","#836fff","#63b8ff",
+          "#40e0d0","#9acd32","#ffa54f","#ff6347",
+          "#0000ff","#ee82ee","#ffe1ff","#ffdab9",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f","#cd853f","#cd853f",
+          "#cd853f","#cd853f")
+levels(igraph_col2) = color
+V(igraph)$color = as.character(igraph_col2)
+
+actors<-as_data_frame(igraph, what="vertices")
+relations<-as_data_frame(igraph, what="edges")
+relation<-relations[order(relations$weight,decreasing = TRUE),] #按第一列递增排序
+g <- graph_from_data_frame(relation, directed=F, vertices=actors)
+
+
+f_nd<-plot(g,main="Ncont-N50\n Positive links: 577\n Negative links: 16",vertex.frame.color=NA,
+           edge.lty=1,edge.curved=TRUE,edge.width=0.1,margin=c(0,0,0,0),
+           vertex.label=NA,layout=layout_in_circle,vertex.size=5)
+```

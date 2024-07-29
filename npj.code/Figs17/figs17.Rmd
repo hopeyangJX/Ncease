@@ -1,0 +1,128 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+```{r,warning=FALSE,fig.height=7.65,fig.width=9.88}
+rm(list=ls())
+library(vegan)###
+setwd("/Users/yangjianxia/Desktop/npj.code/Figs17")
+library(vegan)
+library(PMCMRplus)
+library(MASS)
+library(permute)
+library(lattice)
+library(car)
+library(nlme)
+library(mgcv)
+library(labdsv)
+library(sciplot)
+library(spdep)
+library(agricolae)
+library(vegan)
+library(ggplot2)
+library(colorRamps)
+library(gtable)
+library(tidyverse)
+alpha<-read.csv("BNceaseotu.csv",header=T,row.names = 1)
+alpha<-data.frame(alpha)
+##shannon指数
+Shannon.Wiener<-diversity(alpha,index = "shannon")
+###simpson指数
+Simpson<-diversity(alpha,index = "simpson")
+###observed_species
+observed_species<-specnumber(alpha)
+###chao1
+Chao1<-estimateR(alpha)[2,]
+###ACE指数
+ACE<-estimateR(alpha)[4,]
+###计算物种系统发育指数PD需要树文件（tree)
+####导出数据
+alphadata<-data.frame(Shannon.Wiener,Simpson,observed_species,Chao1,ACE)
+data0<-alphadata
+env0<-read.csv("BNceasegroup.csv",header=T,row.names = 1)
+otu<-cbind(data0,env0)
+write.csv(otu,"alpha.csv")
+otu$Nadd<-factor(otu$Nadd,levels = c("Ncont","Ncess"))
+otu$Nlevel<-factor(otu$Nlevel,levels=c("0","2","5","10","15","20","50"),ordered = T)
+col11<-c("darkgrey","chartreuse","deepskyblue","darkviolet","darkorange","#CC0033","darkgoldenrod")
+lines<-c("Ncess"="solid","Ncont"="dotted")
+plot1<-ggplot(data=otu, aes(x= Nlevel , y= observed_species,color=Nlevel,linetype=Nadd))+  
+  geom_jitter( position = position_dodge(width = 0.5))+
+  geom_boxplot( width = 0.5, size=1.5,position = position_dodge(width = 0.5)) +
+  scale_linetype_manual(values=lines,
+                        labels=c(expression(N[cont]),expression(N[cess])))+
+  scale_colour_manual(values=col11)+
+  ylim(0,3000)+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[level])))+
+  guides(linetype=guide_legend(title = expression(N[add])))+
+  xlab(bquote('N levels ('*g~N~m ^-2~yr^-1*')')) +
+  ylab(bquote('Bacterial OTU richness'))+
+  theme(text=element_text(size=30,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=30),
+        legend.text = element_text(colour="black", size=30),
+        axis.text=element_text(colour="black",size=30),
+        axis.title=element_text(colour="black",size=30))
+plot1
+data1<-subset(otu,Nadd=="Ncont")
+kruskal_rlt <- function(y, trt) {
+  kru_rlt <- kruskal(y, trt, p.adj = "bonferroni")
+  kru_lab <- data.frame(
+    grp = rownames(kru_rlt$groups),
+    sig_lab = kru_rlt$groups$groups
+  )
+  return(kru_lab)
+} 
+kruskal.test(data1$observed_species ~ data1$Nlevel)#
+kruskal_rlt(data1$observed_species,data1$Nlevel)
+
+
+data2<-subset(otu,Nadd=="Ncess")
+kruskal_rlt <- function(y, trt) {
+  kru_rlt <- kruskal(y, trt, p.adj = "bonferroni")
+  kru_lab <- data.frame(
+    grp = rownames(kru_rlt$groups),
+    sig_lab = kru_rlt$groups$groups
+  )
+  return(kru_lab)
+} 
+kruskal.test(data2$observed_species ~ data2$Nlevel)#
+kruskal_rlt(data2$observed_species,data2$Nlevel)
+
+
+
+###ttest
+OTU.N0<-otu[otu$Nlevel=="0",]
+t.test(OTU.N0$observed_species[1:5],OTU.N0$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+OTU.N2<-otu[otu$Nlevel=="2",]
+t.test(OTU.N2$observed_species[1:5],OTU.N2$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+OTU.N5<-otu[otu$Nlevel=="5",]
+t.test(OTU.N5$observed_species[1:5],OTU.N5$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+OTU.N10<-otu[otu$Nlevel=="10",]
+t.test(OTU.N10$observed_species[1:5],OTU.N10$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+OTU.N15<-otu[otu$Nlevel=="15",]
+t.test(OTU.N15$observed_species[1:5],OTU.N15$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+OTU.N20<-otu[otu$Nlevel=="20",]
+t.test(OTU.N20$observed_species[1:5],OTU.N20$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+OTU.N50<-otu[otu$Nlevel=="50",]
+t.test(OTU.N50$observed_species[1:5],OTU.N50$observed_species[6:10],alternative = c("two.sided", "less", "greater"))
+
+
+
+####添加统计信息
+library(dplyr)
+otu2<-distinct(otu,Nadd,Nlevel) %>%
+  arrange(Nadd,Nlevel)
+otu2$y.R = max(otu$observed_species)+80
+otu2$label = c("A","ABC","AB","ABC","BC","C","D",
+               "a","a","a","a","a","ab","b")
+p<-plot1 + geom_text(data = otu2, aes(y = y.R, label = label),color="black",
+                     position = position_dodge(width = .5))
+p
+p2<-p+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p2
+#ggsave("figs19.OTU.pdf",width = 9.88,height = 7.65)
+```
+

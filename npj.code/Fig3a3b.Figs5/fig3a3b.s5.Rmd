@@ -1,0 +1,104 @@
+---
+title: "fig3a3b.s5"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,fig.height=6,fig.width=8,warning=FALSE}
+rm(list=ls())
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig3a3b.Figs5")
+library(readxl)
+library(ggplot2)
+library(colorRamps)
+library(gtable)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(vegan)
+library(psych)
+library(igraph)
+library(tidyr)
+library(MuMIn)
+da<-read_excel("HGT.xlsx",sheet = "Sheet2")
+da$LN<-log(da$Nlevel+1)
+da$Nadd <- factor(da$Nadd, levels = c("Ncess", "Ncont"))
+summary(lm(da$LN~da$HGT.events))
+p1<-ggplot(da,aes(x=LN,y=HGT.events,colour=Nadd))+
+  geom_smooth(data=da,aes(x=LN, y=HGT.events), method = "lm", color = "black",linewidth=2)+
+  geom_jitter(height = 0, alpha = 0.5, size =13) + 
+  scale_shape_manual(values=c(16,16))+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('HGT events'))+
+  annotate("text",x=1.5,y=80,parse=TRUE,label='atop(italic(R^2)==0.230)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1.5,y=75,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=10, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=18))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("fig3a.pdf",width = 8,height = 6)
+summary(lm(da$LN~da$HGT.events))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$LN~data1$HGT.events))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$LN~data2$HGT.events))
+#######
+####hgt中ko的多样性
+p2<-ggplot(da,aes(x=LN,y=HGT.ko,colour=Nadd))+
+  geom_smooth(data=da,aes(x=LN, y=HGT.ko), method = "lm", color = "black",linewidth=2)+
+  geom_jitter(height = 0, alpha = 0.5, size =13) + 
+  scale_shape_manual(values=c(16,16))+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('The richness of horizontally transferred genes'))+
+  annotate("text",x=1.5,y=89,parse=TRUE,label='atop(italic(R^2)==0.221)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1.5,y=80,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=10, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=18))
+p2<-p2+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p2
+#ggsave("fig3b.pdf",width = 8,height = 6)
+summary(lm(da$LN~da$HGT.ko))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$LN~data1$HGT.ko))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$LN~data2$HGT.ko))
+####hgt.rate
+p2<-ggplot(da,aes(x=LN,y=HGT.rate,colour=Nadd))+
+  geom_smooth(data=da,aes(x=LN, y=HGT.rate), method = "lm", color = "black",linewidth=2)+
+  geom_jitter(height = 0, alpha = 0.5, size =13) + 
+  scale_shape_manual(values=c(16,16))+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('The richness of horizontally transferred genes'))+
+  annotate("text",x=0.5,y=0.16,parse=TRUE,label='atop(italic(R^2)== 0.051)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=0.5,y=0.15,parse=TRUE,label='atop(italic(P) == 0.034)',
+           size=10, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=18))
+p2<-p2+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p2
+#ggsave("figs5.hgt.rate.pdf",width = 8,height = 6)
+summary(lm(da$LN~da$HGT.rate))
+```

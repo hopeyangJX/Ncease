@@ -1,0 +1,50 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+```{r,warning=FALSE,fig.width=11,fig.height=7}
+setwd("/Users/yangjianxia/Desktop/npj.code/Figs20")
+rm(list = ls())
+mat<-read.csv("annotation.csv",row.names = 1,header = T)
+library(ggplot2)
+library(vegan)
+library(colorRamps)
+library(psych)
+library(tidyr)
+library(readxl)
+mat$Phylum<-factor(mat$Phylum,levels=c("Acidobacteriota","Patescibacteria","Proteobacteria",
+                                       "Actinobacteriota","Chloroflexota","Bacteroidota",
+                                       "Gemmatimonadota","Planctomycetota","Verrucomicrobiota",
+                                       "Armatimonadota","Cyanobacteria","Eremiobacterota"))
+mat$Phylum<-factor(mat$Phylum,labels=c("Acidobacteriota","Patescibacteria","Proteobacteria",
+                                       "Actinobacteriota","Chloroflexota","Bacteroidota",
+                                       "Gemmatimonadota","Planctomycetota","Verrucomicrobiota",
+                                       "Armatimonadota","Cyanobacteria","Eremiobacterota"))
+col11<-c("red","blue","slateblue1","springgreen","steelblue1","tan1", "tomato","turquoise","violet","darkorange","firebrick","darkgreen")
+
+mat$Quality<-factor(mat$Quality,levels=c("N","M","P"))
+mat$Quality<-factor(mat$Quality,labels=c("Near complete genome",
+                                       "Medium quality genome",
+                                       "Partial genome"),order=T)
+names(mat)[names(mat)=="Quality"]  <- "Genome quality"
+
+# View a few rows from the end product
+head(mat)
+
+p1<-ggplot(data=mat,aes(x= Completeness, y= Contamination,shape=`Genome quality`)) + 
+  geom_jitter(aes(color = Phylum),  height = 0, alpha = 0.8, size =8) + 
+  labs(x = "Completeness (%)",y = "Contamination (%)")+
+ylim(0,8)+
+  theme_bw()+
+  scale_colour_manual(values = col11)+
+  scale_shape_manual(values = c(18, 15, 17)) + #自定义点的形状，分别为15， 19， 17。
+  theme(legend.title = element_text(colour="black", size=20, face="bold"),
+        legend.text = element_text(colour="black", size=20, face="bold"),
+        axis.text=element_text(size=20,face="bold"),
+        axis.title=element_text(size=20,face="bold"))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+#ggsave("figs20.8050.pdf",width=11,height=7)
+```

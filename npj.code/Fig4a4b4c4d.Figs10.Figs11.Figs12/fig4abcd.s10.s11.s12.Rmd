@@ -1,0 +1,387 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,warning=FALSE,fig.height=8.65,fig.width=11.66}
+rm(list=ls())
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig4a4b4c4d.Figs10.Figs11.Figs12")
+library(ggplot2)
+library(colorRamps)
+library(gtable)
+library(dplyr)
+library(agricolae)
+library(nlme)
+library(vegan)
+library(psych)
+library(igraph)
+library(tidyr)
+library(MuMIn)
+da<-read.csv("Relation1.csv",row.names = 1)
+da$LN<-log(da$Nlevel+1)
+da$Nadd <- factor(da$Nadd, levels = c("Ncess", "Ncont"))
+###otu richness
+rr1<-lme(OTU.richness~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+##统计分析,分开
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$OTU.richness~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$OTU.richness~data2$LN))
+plot1<-ggplot(da,aes(x= LN, y= OTU.richness, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  stat_smooth(data = da, method ="lm",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('S.16S'))+theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=40))
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+#ggsave("fig4a.otu_richness_lm.pdf",width = 11.66,height = 7.65)
+#ggsave("fig4a.otu_richness_lm.png",width = 11.66,height = 7.65)
+###ko richness
+rr1<-lme(KO.richness~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$KO.richness~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$KO.richness~data2$LN))
+plot1<-ggplot(da,aes(x= LN, y= KO.richness, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  stat_smooth(data = da, method ="lm",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('S.KO'))+theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=40))
+p2<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p2
+#ggsave("fig4b.KO_richness_lm.pdf",width = 11.66,height = 7.65)
+
+####KO.richness~~OTU.richness
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$KO.richness~data1$OTU.richness))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$KO.richness~data2$OTU.richness))
+plot1<-ggplot(da,aes(x= OTU.richness, y= KO.richness, colour = Nadd))+
+  geom_point(aes(color=Nadd), alpha = 0.5, size =13)+
+  stat_smooth(data = da, method ="lm",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  xlab(bquote('S.16S')) +
+  ylab(bquote('S.KO'))+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=40))
+p3<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p3
+#ggsave("fig4c.otu_KO.pdf",width = 11.66,height = 7.65)
+
+###ko/otu
+rr1<-lme(OTU.richness~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+summary(lm(da$rate~da$LN))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$rate~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$rate~data2$LN))
+plot1<-ggplot(da,aes(x= LN, y= rate, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  stat_smooth(data = da, method ="lm",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('S.KO:S.16S'))+theme_bw()+
+  #annotate("text",x=1,y=4.1,parse=TRUE,label='atop(italic(R^2)==0.243)',
+          # size=10, face="bold",colour="black")+
+  #annotate("text",x=1,y=4.09,parse=TRUE,label='atop(italic(P) < 0.001)',
+           #size=9.9, face="bold",colour="black")+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=40))
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+#ggsave("fig4d.otu_richness_lm.pdf",width = 11.66,height = 7.65)
+
+###virus
+rr1<-lme(virus~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+summary(lm(da$virus~da$LN))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$virus~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$virus~data2$LN))
+p1<-ggplot(da,aes(x=LN,y=virus,colour=Nadd))+
+  geom_smooth(data=da,aes(x=LN, y=virus), method = "lm", color = "black",linewidth=2)+
+  geom_jitter(height = 0, alpha = 0.5, size =12) + 
+  scale_shape_manual(values=c(16,16))+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('Shannon diversity of virus'))+
+  annotate("text",x=1,y=3.51,parse=TRUE,label='atop(italic(R^2)==0.211)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1,y=3.39,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=9.9, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40, face="bold"),
+        legend.text = element_text(colour="black", size=40, face="bold"),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+#ggsave("figs10a_virus_nlevels_lm.pdf",width = 11.66,height =8.65)
+
+####plasmid的多样性
+summary(lm(da$LN~da$plasmids))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$LN~data1$plasmids))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$LN~data2$plasmids))
+p2<-ggplot(da,aes(x=LN,y=plasmids,colour=Nadd))+
+  geom_smooth(data=da,aes(x=LN, y=plasmids), method = "lm", color = "black",linewidth=2)+
+  geom_jitter(height = 0, alpha = 0.5, size =12) + 
+  scale_shape_manual(values=c(16,16))+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('Shannon diversity of plasmid'))+
+  annotate("text",x=1,y=4.41,parse=TRUE,label='atop(italic(R^2)==0.279)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1,y=4.39,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=9.9, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40, face="bold"),
+        legend.text = element_text(colour="black", size=40, face="bold"),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+p2<-p2+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p2
+#ggsave("figs10b_plasmid_shannon.pdf",width = 11.66,height =8.65)
+
+###OTU.shannon
+rr1<-lme(OTU.shannon~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+summary(lm(da$h.function~da$lgtko2))
+summary(lm(da$OTU.shannon~da$LN))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$OTU.shannon~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$OTU.shannon~data2$LN))
+plot1<-ggplot(da,aes(x= LN, y= OTU.shannon, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  geom_smooth(data=da,aes(x=LN, y=OTU.shannon), method = "lm", color = "black",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  annotate("text",x=2.2,y=5.4,parse=TRUE,label='atop(italic(R^2)==0.07)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=2.1,y=5.15,parse=TRUE,label='atop(italic(P) == 0.01)',
+           size=10, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  labs(y = "H'.16S")+theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40, face="bold"),
+        legend.text = element_text(colour="black", size=40, face="bold"),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+ps1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+ps1
+#ggsave("figs11a.pdf",width = 11.66,height =8.65)
+### KO.shannon
+rr1<-lme(KO.shannon~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+summary(lm(da$KO.shannon~da$LN))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$KO.shannon~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$KO.shannon~data2$LN))
+plot1<-ggplot(da,aes(x= LN, y= KO.shannon, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  geom_smooth(data=da,aes(x=LN, y=KO.shannon), method = "lm", color = "black",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  annotate("text",x=1,y=8.1,parse=TRUE,label='atop(italic(R^2)==0.618)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1,y=8.09,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=9.9, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  labs(y = "H'.KO")+
+  #ylab(bquote('KO diversity'))+theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40, face="bold"),
+        legend.text = element_text(colour="black", size=40, face="bold"),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+ps2<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+ps2
+#ggsave("figs11b.pdf",width = 11.66,height =8.65)
+###OTU.H~lgtko.H
+summary(lm(da$OTU.shannon~da$KO.shannon))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$OTU.shannon~data1$KO.shannon))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$OTU.shannon~data2$KO.shannon))
+plot1<-ggplot(da,aes(x= OTU.shannon, y= KO.shannon, colour = Nadd))+
+  geom_point(aes(color=Nadd), alpha = 0.5, size =13)+
+  geom_smooth(data=da,aes(x= OTU.shannon, y= KO.shannon), method = "lm", color = "black",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  labs(x = "H'.16S")+
+  labs(y = "H'.KO")+
+  annotate("text",x=5.5,y=8.05,parse=TRUE,label='atop(italic(R^2)==0.354)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=5.5,y=8.04,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=10, face="bold",colour="black")+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+ps3<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+ps3
+#ggsave("figs11c.pdf",width = 11.66,height =8.65)
+
+summary(lm(da$h.function~da$LN))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$h.function~data1$LN))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$h.function~data2$LN))
+plot1<-ggplot(da,aes(x= LN, y= h.function, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  geom_smooth(data=da,aes(x=LN, y=h.function), method = "lm", color = "black",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  annotate("text",x=1,y=1.41,parse=TRUE,label='atop(italic(R^2)==0.07)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1,y=1.35,parse=TRUE,label='atop(italic(P) == 0.01)',
+           size=9.9, face="bold",colour="black")+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  labs(y = "H'.KO:H'16S")+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40, face="bold"),
+        legend.text = element_text(colour="black", size=40, face="bold"),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+ps4<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+ps4
+#ggsave("figs11d.pdf",width = 11.66,height =8.65)
+###OTU.richness~lgtko
+summary(lm(da$OTU.shannon~da$lgtko2))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$OTU.shannon~data1$lgtko2))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$OTU.shannon~data2$lgtko2))
+plot1<-ggplot(da,aes(x= lgtko2, y= OTU.shannon, colour = Nadd))+
+  geom_point(aes(color=Nadd), alpha = 0.5, size =13)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  labs(x = "H'.HGT")+
+  labs(y = "H'.16S")+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+ps5<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+ps5
+#ggsave("figs11e.pdf",width = 11.66,height =8.65)
+###KO.richness~lgtko
+summary(lm(da$KO.shannon~da$lgtko2))
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$KO.richness~data1$lgtko1))
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$KO.richness~data2$lgtko1))
+plot1<-ggplot(da,aes(x= lgtko2, y= KO.shannon, colour = Nadd))+
+  geom_point(aes(color=Nadd), alpha = 0.5, size =13)+
+  geom_smooth(data=da,aes(x= lgtko2, y= KO.shannon), method = "lm", color = "black",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  guides(colour=guide_legend(title = expression(N[add])))+theme_bw()+
+  labs(x = "H'.HGT")+
+  labs(y = "H'.KO")+
+  annotate("text",x=4,y=8.01,parse=TRUE,label='atop(italic(R^2)==0.267)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=4,y=8,parse=TRUE,label='atop(italic(P) < 0.001)',
+           size=10, face="bold",colour="black")+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40),
+        legend.text = element_text(colour="black", size=40),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+ps6<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+ps6
+#ggsave("figs11f.pdf",width = 11.66,height =8.65)
+library(patchwork)
+###对前12个图进行合并
+#ps1+ps2+ps3+ps4+ps5+ps6+ plot_layout(ncol = 2, byrow =T)
+#ggsave("diversity.pdf",width=22,height=25)
+###AGS
+rr1<-lme(AGS~LN*Nadd,random = ~1|Block,data = da)
+summary(rr1)
+summary(lm(da$AGS~da$LN))
+##统计分析,分开
+data1 <-da[da$Nadd=="Ncont",] 
+summary(lm(data1$AGS~data1$LN))
+###
+data2 <-da[da$Nadd=="Ncess",] 
+summary(lm(data2$AGS~data2$LN))
+###
+plot1<-ggplot(da,aes(x= LN, y= AGS, colour = Nadd))+
+  geom_point(alpha = 0.5, size =13)+
+  geom_smooth(data=da,aes(x=LN, y=AGS), method = "lm", color = "black",linewidth=2)+
+  scale_colour_manual(values=c( "blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  annotate("text",x=1,y=3.1,parse=TRUE,label='atop(italic(R^2)==0.03)',
+           size=10, face="bold",colour="black")+
+  annotate("text",x=1,y=3,parse=TRUE,label='atop(italic(P) == 0.08)',
+           size=9.9, face="bold",colour="black")+
+  theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('Average Genome Size (Mbp)'))+
+  theme_bw()+
+  theme(text=element_text(colour="black",size=40,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=40, face="bold"),
+        legend.text = element_text(colour="black", size=40, face="bold"),
+        axis.text=element_text(colour="black",size=40),
+        axis.title=element_text(colour="black",size=40))
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+#ggsave("figs12_AGS_nlevels_lm.pdf",width = 11.66,height =8.65)
+```
+

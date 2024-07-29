@@ -1,0 +1,180 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+
+```{r,warning=FALSE,fig.height=8,fig.width=10}
+rm(list=ls())
+library(vegan)
+#library(WGCNA)
+#library(multtest)
+library(igraph)
+library(brainGraph)
+library(ggrepel)
+library(dplyr)
+library(plyr)
+library(readr)
+library(rtk)
+cutoff<-10000
+env0<-read.csv("BNceasegroup.csv",header = T)
+BF0<-read.csv("BNceaseotu.csv",header = T,row.names = 1)
+B.Ncont.N0<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="0",]
+B.Ncess.N0<-BF0[env0$Nadd=="No"&env0$Nitrogen=="0",]
+
+
+B.Ncont.N50<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="50",]
+B.Ncess.N50<-BF0[env0$Nadd=="No"&env0$Nitrogen=="50",]
+##
+env.Ncont.N0<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="0",]
+env.Ncess.N0<-env0[env0$Nadd=="No"&env0$Nitrogen=="0",]
+
+env.Ncont.N50<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="50",]
+env.Ncess.N50<-env0[env0$Nadd=="No"&env0$Nitrogen=="50",]
+##
+set.seed(123)
+B.Ncont.N0.rar<-data.frame(rrarefy(t(B.Ncont.N0),cutoff))
+set.seed(123)
+B.Ncess.N0.rar<-data.frame(rrarefy(t(B.Ncess.N0),cutoff))
+
+set.seed(123)
+B.Ncont.N50.rar<-data.frame(rrarefy(t(B.Ncont.N50),cutoff))
+set.seed(123)
+B.Ncess.N50.rar<-data.frame(rrarefy(t(B.Ncess.N50),cutoff))
+##
+library(beepr)
+beep()
+d1.raw<-B.Ncont.N0.rar
+d2.raw<-B.Ncess.N0.rar
+
+d13.raw<-B.Ncont.N50.rar
+d14.raw<-B.Ncess.N50.rar
+##
+library(psych)
+d1<-d1.raw
+keep=4
+count=rowSums(d1>0)
+d1=d1[count>=keep,]
+d1<-t(d1)
+co.d1=corr.test(d1, use="pairwise",method="spearman",
+                adjust="fdr",alpha=0.05,ci=FALSE)
+r<-as.matrix(co.d1$r)
+co.d1.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d1.rall.df$Nadd<-"Ncont"
+co.d1.rall.df$Nlevel<-"0"
+##
+d2<-d2.raw
+keep=4
+count=rowSums(d2>0)
+d2=d2[count>=keep,]
+d2<-t(d2)
+co.d2=corr.test(d2, use="pairwise",method="spearman",
+                adjust="fdr",alpha=0.05,ci=FALSE)
+r<-as.matrix(co.d2$r)
+co.d2.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d2.rall.df$Nadd<-"Ncess"
+co.d2.rall.df$Nlevel<-"0"
+##
+
+##
+d13<-d13.raw
+keep=4
+count=rowSums(d13>0)
+d13=d13[count>=keep,]
+d13<-t(d13)
+co.d13=corr.test(d13, use="pairwise",method="spearman",
+                 adjust="fdr",alpha=0.05,ci=FALSE)
+r<-as.matrix(co.d13$r)
+co.d13.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d13.rall.df$Nadd<-"Ncont"
+co.d13.rall.df$Nlevel<-"50"
+##
+d14<-d14.raw
+keep=4
+count=rowSums(d14>0)
+d14=d14[count>=keep,]
+d14<-t(d14)
+co.d14=corr.test(d14, use="pairwise",method="spearman",
+                 adjust="fdr",alpha=0.05,ci=FALSE)
+r<-as.matrix(co.d14$r)
+co.d14.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d14.rall.df$Nadd<-"Ncess"
+co.d14.rall.df$Nlevel<-"50"
+co.all<-rbind(co.d1.rall.df,co.d2.rall.df,
+              co.d13.rall.df,co.d14.rall.df)
+da.Rdis<-co.all
+da.Rdis$Nadd<-factor(da.Rdis$Nadd)
+da.Rdis$Nlevel<-factor(da.Rdis$Nlevel)
+da.Rdis$intera<-factor(paste(da.Rdis$Nadd,da.Rdis$Nlevel))
+library(splitstackshape)
+diame<-ddply(da.Rdis,.(intera),numcolwise(median))
+dia_med<-cSplit(diame,"intera"," ")
+dia_med$Nadd<-dia_med$intera_1
+dia_med$Nlevel<-dia_med$intera_2
+da.Rdis$r<-round(da.Rdis$r,4)
+da.Rdis$Nlevel<-as.factor(da.Rdis$Nlevel)
+da.Rdis$Nadd<-as.factor(da.Rdis$Nadd)
+dia_med$Nlevel<-as.factor(dia_med$Nlevel)
+dia_med$Nadd<-as.factor(dia_med$Nadd)
+library(colorRamps)
+library(ggplot2)
+library(ggthemes)
+da.Rdis$Nadd <- factor(da.Rdis$Nadd, levels = c("Ncont", "Ncess"))
+plot1<-ggplot(da.Rdis,aes(x=r,colour=Nlevel,linetype=Nadd))+
+  geom_density(size=1.5)+
+  scale_colour_manual(values=c("darkgrey","darkgoldenrod"),
+                      labels=c(expression(N0),expression(N50)))+
+  scale_linetype_manual(values=c(3,1),
+                        labels=c(expression(N[cont]),expression(N[cess])))+
+  xlab("Spearman")+ylab("Density")+
+  guides(colour=guide_legend(title = expression(N[level])))+
+  guides(linetype=guide_legend(title = expression(N[add])))+
+  geom_vline(data=dia_med,aes(xintercept=r,colour=Nlevel,linetype=Nadd),size=1.5)+
+  theme_tufte()+
+  theme(text=element_text(size=35,  family="sans"))+
+  theme(strip.text=element_text(size=35),
+        panel.spacing = unit(0,"lines"),
+        legend.title=element_text(colour="black",size=35),
+        legend.text=element_text(colour="black",size=35),
+        axis.text=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=35,face = "bold"))
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+ggsave("fig5a.pdf",width = 10,height = 8)
+#ggsave("fig4a.png",width = 10,height = 8)
+####b
+data<-co.all
+plot1<-ggplot(data, aes(x= as.numeric(Nlevel),y= r, color = Nadd)) + 
+  geom_smooth(method='lm', linewidth =2.5, se = FALSE)+
+  scale_color_manual(values = c("blue","red"),
+                     labels=c(expression(N[cess]),expression(N[cont])))+
+  xlab("")+ylab("All Spearman's Rho")+theme_bw()+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  guides(fill=guide_legend(title= "Type"))+
+  #annotate("text",x=10,y=0.09,parse=TRUE,label='atop(italic(p) < 0.001)',size=10, face="bold")+
+  #annotate("text",x=11,y=0.1,parse=TRUE,label='atop(t == -15.802)',size=10, face="bold")+
+  scale_x_continuous(breaks = c(1,50),labels = c("N0", "N50"))+
+  theme(text=element_text(size=35,  family="sans"))+
+  theme(strip.text = element_text(size = 35),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=35),
+        legend.text = element_text(colour="black", size=35),
+        axis.text.x=element_text(colour="black",size=35,angle = 90, hjust = 1,face = "bold"),
+        axis.text.y=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=35,face = "bold"))
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+ggsave("fig5b.pdf",width = 10,height = 8)
+#ggsave("fig4b.png",width = 10,height = 8)
+```
+

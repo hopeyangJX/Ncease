@@ -1,0 +1,321 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,fig.width=4,fig.height=4,warning=FALSE}
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig3fghijklmnopqrs")
+rm(list=ls())
+library(circlize)
+###NN00
+mat<-read.csv("NN00.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="NN00.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'0'*':'~'2'*'2'*'6'~'H'*'G'*'T'*'s'))
+dev.off()
+####NN02
+mat<-read.csv("NN02.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+pdf(file="NN02.pdf",width = 4,height = 4,pointsize = 13)
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'2'*':'~'2'*'0'*'8'~'H'*'G'*'T'*'s'))
+dev.off()
+###NN05
+mat<-read.csv("NN05.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="NN05.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'5'*':'~'2'*'2'*'6'~'H'*'G'*'T'*'s'))
+dev.off()
+###NN10
+mat<-read.csv("NN10.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="NN10.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'1'*'0'*':'~'2'*'3'*'9'~'H'*'G'*'T'*'s'))
+dev.off()
+###NN15
+mat<-read.csv("NN15.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="NN15.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'1'*'5'*':'~'2'*'1'*'7'~'H'*'G'*'T'*'s'))
+dev.off()
+###NN20
+mat<-read.csv("NN20.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="NN20.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'2'*'0'*':'~'2'*'5'*'1'~'H'*'G'*'T'*'s'))
+dev.off()
+####NN50
+mat<-read.csv("NN50.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="NN50.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cess]*'N'*'5'*'0'*':'~'3'*'1'*'8'~'H'*'G'*'T'*'s'))
+dev.off()
+###YN00
+mat<-read.csv("YN00.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN00.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'0'*':'~'2'*'3'*'1'~'H'*'G'*'T'*'s'))
+dev.off()
+###YN02
+mat<-read.csv("YN02.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN02.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'2'*':'~'2'*'1'*'6'~'H'*'G'*'T'*'s'))
+dev.off()
+###YN05
+mat<-read.csv("YN05.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN05.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'5'*':'~'1'*'7'*'0'~'H'*'G'*'T'*'s'))
+dev.off()
+###YN10
+mat<-read.csv("YN10.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN10.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'1'*'0'*':'~'2'*'3'*'7'~'H'*'G'*'T'*'s'))
+dev.off()
+###YN15
+mat<-read.csv("YN15.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN15.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'1'*'5'*':'~'3'*'0'*'0'~'H'*'G'*'T'*'s'))
+dev.off()
+####YN20
+mat<-read.csv("YN20.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN20.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'2'*'0'*':'~'2'*'4'*'0'~'H'*'G'*'T'*'s'))
+dev.off()
+###YN50
+mat<-read.csv("YN50.csv",row.names = 1,header = T)
+head(mat)
+circos.clear()
+grid.col = c(A1 = "#00ff7f", A2 = "#ffa54f", A3 = "#63b8ff",A4 = "#ffe1ff",
+             A5 = "#836fff", A6 = "#ff0000", A7 = "#ee82ee", A8 = "#cd853f",
+             A9 = "#40e0d0", A10 = "#ff6347",
+             B1 = "#00ff7f", B2 = "#ffa54f", B3 = "#63b8ff",B4 = "#ffe1ff",
+             B5 = "#836fff", B6 = "#ff0000", B7 = "#ee82ee", B8 = "#cd853f",
+             B9 = "#40e0d0", B10 = "#ff6347")
+circos.par(gap.after = c("A1" = 6, "A2" = 6, "A3" = 6, "A4" = 6, "A5" = 6,
+                         "A6" = 6, "A7" = 6, "A8" = 6, "A9" = 6,"A10" = 6,
+                         "B1" = 6,"B2" = 6, "B3" = 6, "B4" = 6, "B5" = 6,
+                         "B6" = 6,"B7" = 6, "B8" = 6, "B9" = 6, "B10" = 6))
+pdf(file="YN50.pdf",width = 4,height = 4,pointsize = 13)
+chordDiagram(mat, order = c("A1", "A2", "A3", "A4", 
+                            "A5", "A6", "A7", "A8","A9","A10",
+                            "B1", "B2", "B3", "B4", "B5", "B6",
+                            "B7", "B8","B9","B10"),grid.col = grid.col,
+             transparency = 0)
+title(main=expression(N[cont]*'N'*'5'*'0'*':'~'2'*'9'*'3'~'H'*'G'*'T'*'s'))
+dev.off()
+```
+

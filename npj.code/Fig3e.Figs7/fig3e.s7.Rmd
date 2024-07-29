@@ -1,0 +1,123 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+```{r,fig.height=18,fig.width=16,warning=FALSE}
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig3e.Figs7")
+rm(list=ls())
+data<-read.csv("up.level2.csv",header = T,row.names = 1)
+data$Annotation<-factor(data$Annotation,levels=c("Cell.motility",
+                                                 "Cellular.community.-.prokaryotes", 
+                                                 "Signal.transduction",
+                                                 "Membrane.transport",
+                                                 "Energy.metabolism",
+                                                 "Xenobiotics.biodegradation.and.metabolism",
+                                                 "Translation"),ordered = T)
+data$Annotation<-factor(data$Annotation,
+                        labels=c("Cell motility",
+                                 "Cellular community", 
+                                 "Signal transduction",
+                                 "Membrane transport",
+                                 "Energy metabolism",
+                                 "Xenobiotics biodegradation \
+                                 and metabolism",
+                                 "Translation"),ordered = T)
+library(patchwork)
+##上调
+library(ggplot2)
+p1<-ggplot(data, aes(x=ratio, y=Annotation,colour=group,shape=sig)) +
+  geom_point(alpha = 0.8,size=15)+
+  scale_shape_manual(values = c(1,16))+
+  scale_colour_manual(values = c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  geom_vline(aes(xintercept=1),colour="Black",size=3.5,linetype="dashed")+
+  xlab("Enrichment ratio")+
+  ylab(" ")+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  theme(text=element_text(size=25,  family="sans"))+
+  theme(axis.text.x=element_text(size=25,color="black"), 
+        axis.text.y=element_text(size=25,color="black"), 
+        axis.title=element_text(size=25,color="black"))+
+  xlim(-1, 7)  +
+  #theme(text=element_text(size=11,  family="sans", face="bold"))+
+  theme(legend.position = 'top', 
+        legend.direction = "horizontal")
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("fig3e.pdf",width = 16,height=18)
+```
+
+```{r,fig.height=25,fig.width=20,warning=FALSE}
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig3e.Figs7")
+rm(list=ls())
+data<-read.csv("up.level3.csv",header = T,row.names = 1)
+data$Annotation<-factor(data$Annotation,levels=c( "Nitrotoluene.degradation",
+                                                  "Drug.metabolism.-.other.enzymes",
+                                                  "Phosphotransferase.system",
+                                                  "Fructose.and.mannose.metabolism", 
+                                                  "Bacterial.chemotaxis",
+                                                  "Biofilm.formation.-.Escherichia.coli",
+                                                  "Biofilm.formation.-.Vibrio.cholerae",
+                                                  "Biofilm.formation.-.Pseudomonas.aeruginosa",
+                                                  "Pentose.and.glucuronate.interconversions",    
+                                                  "Two-component.system",
+                                                  "Ribosome",
+                                                  "Quorum.sensing",                              
+                                                  "Betalain.biosynthesis",
+                                                  "HIF-1.signaling.pathway",
+                                                  "Carbon.fixation.in.photosynthetic.organisms",
+                                                  "Photosynthesis",
+                                                  "Oxidative.phosphorylation",
+                                                  "Metabolism.of.xenobiotics.by.cytochrome.P450",
+                                                  "Drug.metabolism.-.cytochrome.P450",
+                                                  "Glutathione.metabolism"),ordered = T)
+data$Annotation<-factor(data$Annotation,
+                        labels=c( "Nitrotoluene degradation",
+                                  "Drug metabolism - other enzymes",
+                                  "Phosphotransferase system",
+                                  "Fructose and mannose metabolism", 
+                                  "Bacterial chemotaxis",
+                                  "Biofilm formation - Escherichia.coli",
+                                  "Biofilm formation - Vibrio.cholerae",
+                                  "Biofilm formation - Pseudomonas.aeruginosa",
+                                  "Pentose and glucuronate interconversions",    
+                                  "Two-component system",
+                                  "Ribosome",
+                                  "Quorum sensing",                              
+                                  "Betalain biosynthesis",
+                                  "HIF-1 signaling pathway",
+                                  "Carbon fixation in photosynthetic organisms",
+                                  "Photosynthesis",
+                                  "Oxidative phosphorylation",
+                                  "Metabolism of xenobiotics by cytochrome P450",
+                                  "Drug metabolism - cytochrome P450",
+                                  "Glutathione metabolism"),ordered = T)
+library(patchwork)
+##上调
+library(ggplot2)
+p1<-ggplot(data, aes(x=ratio, y=Annotation,colour=group,shape=sig)) +
+  geom_point(alpha = 0.8,size=15)+
+  scale_shape_manual(values = c(1,16))+
+  scale_colour_manual(values = c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  theme_bw()+
+  geom_vline(aes(xintercept=1),colour="Black",size=3.5,linetype="dashed")+
+  xlab("Enrichment ratio")+
+  ylab(" ")+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  theme(text=element_text(size=25,  family="sans"))+
+  theme(axis.text.x=element_text(size=25,color="black"), 
+        axis.text.y=element_text(size=25,color="black"), 
+        axis.title=element_text(size=25,color="black"))+
+  xlim(0, 18)  +
+  #theme(text=element_text(size=11,  family="sans", face="bold"))+
+  theme(legend.position = 'top', 
+        legend.direction = "horizontal")
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("figs7.pdf",width = 20,height=25)
+```
+

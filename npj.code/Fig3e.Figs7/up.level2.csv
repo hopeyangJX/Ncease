@@ -1,0 +1,15 @@
+#ID,Annotation,ratio,group,sig,size
+1,Xenobiotics.biodegradation.and.metabolism,2.637992832,Ncont,significant,6
+2,Translation,1.85483871,Ncont,significant,5
+3,Energy.metabolism,1.978494624,Ncont,significant,5
+4,Membrane.transport,0,Ncont,non-significant,0
+5,Signal.transduction,0,Ncont,non-significant,0
+6,Cellular.community.-.prokaryotes,0,Ncont,non-significant,0
+7,Cell.motility,0,Ncont,non-significant,0
+8,Xenobiotics.biodegradation.and.metabolism,3.339130435,Ncess,significant,4
+9,Translation,2.87856072,Ncess,significant,5
+10,Energy.metabolism,0,Ncess,non-significant,0
+11,Membrane.transport,3.130434783,Ncess,significant,6
+12,Signal.transduction,3.928388747,Ncess,significant,4
+13,Cellular.community.-.prokaryotes,3.710144928,Ncess,significant,6
+14,Cell.motility,5.565217391,Ncess,significant,3

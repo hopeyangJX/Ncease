@@ -1,0 +1,151 @@
+---
+title: "figs1"
+output: html_document
+date: "2024-07-28"
+---
+
+```{r,warning=FALSE,fig.height=3.58,fig.width=8.46}
+library(vegan)
+library(colorRamps)
+library(ape)
+library(splitstackshape)
+library(reshape2)
+library(stringr)
+library(colorRamps)
+library(ggplot2)
+library(nlme)
+rm(list=ls())
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig1.Fig2.Figs1")
+data<-read.csv("Mydata.csv",row.names = 1,header = T)
+data$LN<-log(data$Nlevel+1)
+data$LIN<-log(data$IN)
+data$Nadd <- factor(data$Nadd, levels = c("Ncess", "Ncont"))
+relation<-lme(LIN ~ LN*Nadd,random = ~1|Block,data = data)
+summary(relation)
+##统计分析,分开
+data1<-subset(data,Year=="2017"&Nadd=="Ncont")
+summary(lm(data1$LIN~data1$LN))
+data2 <-subset(data,Year=="2017"&Nadd=="Ncess")
+summary(lm(data2$LIN~data2$LN))
+##统计分析,分开
+data1<-subset(data,Year=="2019"&Nadd=="Ncont")
+summary(lm(data1$LIN~data1$LN))
+data2 <-subset(data,Year=="2019"&Nadd=="Ncess")
+summary(lm(data2$LIN~data2$LN))
+l<-ggplot(data,aes(x=LN,y=LIN,colour=Nadd))+
+  geom_jitter(height = 0, alpha = 0.5, size =8) + 
+  scale_shape_manual(values=c(16,16))+
+  stat_smooth(method='lm')+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  facet_wrap(~Year,scales="free", nrow=1)+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote(Log[e]~(IN)~(mg~kg^-1)))+theme_bw()+
+  ylim(0,8)+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  theme(text=element_text(size=25,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=25),
+        legend.text = element_text(colour="black", size=25),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=25))
+p1<-l+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+#ggsave("figs1a.2017_2019_Nlevel_LIN.pdf",width = 8.46,height = 3.68)
+#ggsave("2017_2019_Nlevel_LIN.png",width = 8.46,height = 3.68)
+###Soil pH
+relation<-lme(PH ~ LN*Nadd,random = ~1|Block,data = data)
+summary(relation)
+###
+##统计分析,分开
+##统计分析,分开
+data1<-subset(data,Year=="2017"&Nadd=="Ncont")
+summary(lm(data1$PH~data1$LN))
+data2 <-subset(data,Year=="2017"&Nadd=="Ncess")
+summary(lm(data2$PH~data2$LN))
+##统计分析,分开
+data1<-subset(data,Year=="2019"&Nadd=="Ncont")
+summary(lm(data1$PH~data1$LN))
+data2 <-subset(data,Year=="2019"&Nadd=="Ncess")
+summary(lm(data2$PH~data2$LN))
+
+l<-ggplot(data,aes(x=LN,y=PH,colour=Nadd))+
+  geom_jitter(height = 0, alpha = 0.5, size =8) + 
+  scale_shape_manual(values=c(16,16))+
+  stat_smooth(method='lm')+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  facet_wrap(~Year,scales="free", nrow=1)+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('Soil pH'))+theme_bw()+
+  ylim(3,9)+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  theme(text=element_text(size=25,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=25),
+        legend.text = element_text(colour="black", size=25),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=25))
+p2<-l+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p2
+#ggsave("figs1b.2017_2019_Nlevel_PH.pdf",width = 8.46,height = 3.68)
+#ggsave("2017_2019_Nlevel_PH.png",width = 8.46,height = 3.68)
+###Mn
+relation<-lme(Mn ~ LN*Nadd,random = ~1|Block,data = data)
+summary(relation)
+
+data3<-subset(data,Year=="2019")
+summary(lm(data3$LN~data3$Mn))
+
+data3<-subset(data,Year=="2017") 
+summary(lm(data3$LN~data3$Mn))
+
+l<-ggplot(data,aes(x=LN,y=Mn,colour=Nadd))+
+  geom_jitter(height = 0, alpha = 0.5, size =8) + 
+  scale_shape_manual(values=c(16,16))+
+  geom_smooth(data=data,aes(x=LN, y=Mn), method = "lm", color = "black")+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  facet_wrap(~Year,scales="free", nrow=1)+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('Mn ions ('*mg~kg ^-1*')'))+theme_bw()+
+  ylim(0,80)+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  theme(text=element_text(size=25,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=25),
+        legend.text = element_text(colour="black", size=25),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=25))
+p3<-l+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p3
+#ggsave("figs1c.2017_2019_Mn.pdf",width = 8.46,height = 3.68)
+#ggsave("2017_2019_Mn.png",width = 8.46,height = 3.68)
+##Cu
+relation<-lme(Cu ~ LN*Nadd,random = ~1|Block,data = data)
+summary(relation)
+
+data3<-subset(data,Year=="2019")
+summary(lm(data3$LN~data3$Cu))
+
+data3<-subset(data,Year=="2017") 
+summary(lm(data3$LN~data3$Cu))
+
+l<-ggplot(data,aes(x=LN,y=Cu,colour=Nadd))+
+  geom_jitter(height = 0, alpha = 0.5, size =8) + 
+  scale_shape_manual(values=c(16,16))+
+  geom_smooth(data=data,aes(x=LN, y=Cu), method = "lm", color = "black")+
+  scale_colour_manual(values=c("blue","red"),
+                      labels=c(expression(N[cess]),expression(N[cont])))+
+  facet_wrap(~Year,scales="free", nrow=1)+
+  xlab(bquote(Log[e]~(N~level~+~1)))+
+  ylab(bquote('Cu ions ('*mg~kg ^-1*')'))+theme_bw()+
+  ylim(0,1.5)+
+  guides(colour=guide_legend(title = expression(N[add])))+
+  theme(text=element_text(size=25,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=25),
+        legend.text = element_text(colour="black", size=25),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=25))
+p4<-l+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p4
+#ggsave("figs1d.2017_2019_Cu.pdf",width = 8.46,height = 3.68)
+#ggsave("2017_2019_Cu.png",width = 8.46,height = 3.68)
+```

@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,warning=FALSE,fig.height=8.38,fig.width=11.53}
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig4e")
+rm(list=ls())
+library(tidyverse)
+library(linkET)
+
+data<-read.csv("Relation.csv",row.names=1,header = T)
+data1<-subset(data,Nadd=="Ncont")
+data1<-data1[,4:12]
+data1<-as.data.frame(data1)
+colnames(data1)[1:9]<-c("N levels","Inorganic N","Soil pH","Plant richness", "Plant biomass","S.HGT","S.KO","S.16S", "S.KO:S.16S")
+data1
+
+
+data2<-subset(data,Nadd=="Ncess")
+data2<-data2[,4:12]
+data2<-as.data.frame(data2)
+colnames(data2)[1:9]<-c("N levels","Inorganic N","Soil pH","Plant richness", "Plant biomass","S.HGT","S.KO","S.16S", "S.KO:S.16S")
+data2
+# plot gridline
+data_cor <- correlate(data1)
+# mixed corrplot
+data1_cor <- correlate(data1) %>% as_md_tbl()
+data2_cor <- correlate(data2) %>% as_md_tbl()
+data_sum <- rbind(extract_upper(data1_cor), extract_lower(data2_cor))
+data_sum1 <- 
+  data_sum %>% mutate(sel = if_else(.rownames == .colnames, 0, 1)) %>% 
+  filter(sel == 1) %>% select(-sel)
+mixed_heatmap_p <- 
+  qcorrplot(data = data_cor, type = "full") +
+  geom_square(data = data_sum1) +
+  geom_mark(data = data_sum1, sep = '\n',size=10,sig_level = c(0.05,0.01,0.001),
+            sig_thres = 0.05,only_mark = TRUE)+
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdYlBu")) +
+  scale_size_manual(values = c(0.5, 1, 2)) +
+  scale_colour_manual(values = color_pal(3)) +
+  guides(fill = guide_colorbar(title = "Pearson's r", order = 3))+
+  theme(axis.text = element_text(size=25,family = "sans"))
+mixed_heatmap_p
+#ggsave("fig4e_Nadd.pdf",width = 11.53,height =8.38)
+#ggsave("fig4e_Nadd.png",width = 11.53,height =8.38)
+```

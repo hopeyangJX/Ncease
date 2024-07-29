@@ -1,0 +1,599 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r cars}
+setwd("/Users/yangjianxia/Desktop/npj.code/Figs17")
+rm(list=ls())
+library(GO.db)
+library(vegan)
+library(permute)        
+library(lattice)
+library(WGCNA)
+library(multtest)
+library(igraph)
+library(brainGraph)
+bac.coco<-read.csv("NN00.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+
+
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+
+
+
+
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN00bac_Pi.csv")
+write.csv(bac.Zi,"NN00bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("NN02.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN02bac_Pi.csv")
+write.csv(bac.Zi,"NN02bac_Zi.csv")
+
+
+rm(list=ls())
+bac.coco<-read.csv("NN05.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN05bac_Pi.csv")
+write.csv(bac.Zi,"NN05bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("NN10.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN10bac_Pi.csv")
+write.csv(bac.Zi,"NN10bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("NN15.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN15bac_Pi.csv")
+write.csv(bac.Zi,"NN15bac_Zi.csv")
+
+
+rm(list=ls())
+bac.coco<-read.csv("NN20.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN20bac_Pi.csv")
+write.csv(bac.Zi,"NN20bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("NN50.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"NN50bac_Pi.csv")
+write.csv(bac.Zi,"NN50bac_Zi.csv")
+
+
+rm(list=ls())
+bac.coco<-read.csv("YN00.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN00bac_Pi.csv")
+write.csv(bac.Zi,"YN00bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("YN02.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN02bac_Pi.csv")
+write.csv(bac.Zi,"YN02bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("YN05.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN05bac_Pi.csv")
+write.csv(bac.Zi,"YN05bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("YN10.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0]
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN10bac_Pi.csv")
+write.csv(bac.Zi,"YN10bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("YN15.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN15bac_Pi.csv")
+write.csv(bac.Zi,"YN15bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("YN20.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN20bac_Pi.csv")
+write.csv(bac.Zi,"YN20bac_Zi.csv")
+
+rm(list=ls())
+bac.coco<-read.csv("YN50.csv",head=T,row.names = 1)
+#(bac.coco<-data.frame(decostand(bac.coco[,9:24],"hel")) 
+#bac.coco<- t(bac.coco)
+matrix2igraph2<-function(matr,r.threshold,p.threshold){
+  occor<-corAndPvalue(matr,method = c( "spearman")) 
+  mtadj<-mt.rawp2adjp(unlist(occor$p),proc="TSBH") 
+  adpcor<-mtadj$adjp[order(mtadj$index),2]
+  occor.p<-matrix(adpcor,dim(matr)[2])
+  occor.r<-occor$cor
+  occor.r[occor.p>p.threshold|abs(occor.r)<r.threshold]<-0 
+  diag(occor.r)<-0  
+  igraph<-graph.adjacency(occor.r,mode="undirected", weighted=TRUE, diag=FALSE)# NOTE:可以设置weighted=NULL,但是此时要注意此函数只能识别相互作用矩阵内正整数，所以应用前请确保矩阵正确
+  igraph<- igraph::simplify(igraph)
+  igraph
+}
+
+bac<-matrix2igraph2(bac.coco,0.80,0.01) ###  r,p值可人为设定##
+
+
+bad.vs<-V(bac)[degree(bac) == 0] 
+igraph <- delete.vertices(bac, bad.vs) 
+igraph
+##modularity 
+E(igraph)$weight<-abs(E(igraph)$weight)
+bac.fc<-cluster_fast_greedy(igraph)
+modularity(bac.fc)##>0.4 indicate modular structures
+modularity(bac.fc,membership(bac.fc))
+membership(bac.fc)
+sizes(bac.fc)
+library(brainGraph)
+bac.comps <- membership(bac.fc)
+bac_Pi<-part_coeff(igraph, membership(bac.fc))
+bac.Zi<-within_module_deg_z_score(igraph, membership(bac.fc))
+par(xpd=FALSE)####控制在边框内部划
+plot(bac.Zi~bac_Pi,col=c("black"),cex=1.5,lwd=2,xlim=c(-1,3),ylim=c(-2,4),xlab="Among-module connectivity (Pi)",ylab="Within-module connectivity (Zi)")
+abline(v=0.62,lty=2,col="red",lwd=2)
+abline(h=2.5,lty=2,col="red",lwd=2)
+write.csv(bac_Pi,"YN50bac_Pi.csv")
+write.csv(bac.Zi,"YN50bac_Zi.csv")
+```
+

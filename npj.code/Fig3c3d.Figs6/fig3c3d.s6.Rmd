@@ -1,0 +1,329 @@
+---
+title: "fig3c3d.s6"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,fig.height=6,fig.width=8,warning=FALSE}
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig3c3d.Figs6")
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("YN02.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("YN02.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="red") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("YN02.pdf",width = 8,height = 6)
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("NN02.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("NN02.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="blue") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("NN02.pdf",width = 8,height = 6)
+
+
+
+
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("YN05.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("YN05.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="red") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("YN05.pdf",width = 8,height = 6)
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("NN05.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("NN05.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="blue") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("NN05.pdf",width = 8,height = 6)
+
+
+
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("YN10.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("YN10.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="red") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("YN10.pdf",width = 8,height = 6)
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("NN10.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("NN10.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="blue") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("NN10.pdf",width = 8,height = 6)
+
+
+
+
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("YN15.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("YN15.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="red") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("YN15.pdf",width = 8,height = 6)
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("NN15.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("NN15.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="blue") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("NN15.pdf",width = 8,height = 6)
+
+
+
+
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("YN20.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("YN20.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="red") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("YN20.pdf",width = 8,height = 6)
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("NN20.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("NN20.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="blue") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("NN20.pdf",width = 8,height = 6)
+
+
+
+
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("YN50.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("YN50.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="red") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("YN50.pdf",width = 8,height = 6)
+library(ggplot2)
+rm(list=ls())
+P <- as.matrix(read.table("NN50.P.value.txt", row.name=1, header=T))
+Z <- as.matrix(read.table("NN50.z.score.txt", row.names = 1, header=T))
+Pvec <- as.vector(P)
+Zvec <- as.vector(Z)
+fdr <- Pvec
+fdr[which(Zvec < 0)] <- 1-fdr[which(Zvec < 0)]
+fdr <- p.adjust(fdr, method="fdr")
+da<-as.data.frame(cbind(Zvec,fdr))
+p1<-ggplot(data=da,aes(x=Zvec,y=fdr))+
+  geom_jitter(height = 0, alpha = 0.2, size =13,col="blue") + 
+  xlab(bquote('Two-dimensional preference (2DP)'))+
+  ylab(bquote('P value (FDR)'))+
+  geom_vline(xintercept = 1.3, color = "black", linetype = 2,size=3)+
+  geom_hline(yintercept = 0.05, color = "black", linetype = 2,size=3)+
+  theme_bw()+
+  theme(text=element_text(size=20,  family="sans"))+
+  theme(legend.title = element_text(colour="black", size=20),
+        legend.text = element_text(colour="black", size=20),
+        axis.text=element_text(colour="black",size=20),
+        axis.title=element_text(colour="black",size=20))
+p1<-p1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+#ggsave("NN50.pdf",width = 8,height = 6)
+```

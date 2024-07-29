@@ -1,0 +1,351 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,fig.width = 23.85,fig.height = 17.88,warning=FALSE}
+setwd("/Users/yangjianxia/Desktop/npj.code/Figs13")
+rm(list=ls())
+library(vegan)
+#library(WGCNA)
+#library(multtest)
+library(igraph)
+library(brainGraph)
+library(ggrepel)
+library(dplyr)
+library(plyr)
+library(readr)
+library(rtk)
+cutoff<-10000
+env0<-read.csv("BNceasegroup.csv",header = T,row.names = 1)
+BF0<-read.csv("BNceaseotu.csv",header = T,row.names = 1)
+B.Ncont.N0<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="0",]
+B.Ncess.N0<-BF0[env0$Nadd=="No"&env0$Nitrogen=="0",]
+B.Ncont.N2<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="2",]
+B.Ncess.N2<-BF0[env0$Nadd=="No"&env0$Nitrogen=="2",]
+B.Ncont.N5<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="5",]
+B.Ncess.N5<-BF0[env0$Nadd=="No"&env0$Nitrogen=="5",]
+B.Ncont.N10<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="10",]
+B.Ncess.N10<-BF0[env0$Nadd=="No"&env0$Nitrogen=="10",]
+B.Ncont.N15<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="15",]
+B.Ncess.N15<-BF0[env0$Nadd=="No"&env0$Nitrogen=="15",]
+B.Ncont.N20<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="20",]
+B.Ncess.N20<-BF0[env0$Nadd=="No"&env0$Nitrogen=="20",]
+B.Ncont.N50<-BF0[env0$Nadd=="Yes"&env0$Nitrogen=="50",]
+B.Ncess.N50<-BF0[env0$Nadd=="No"&env0$Nitrogen=="50",]
+##
+env.Ncont.N0<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="0",]
+env.Ncess.N0<-env0[env0$Nadd=="No"&env0$Nitrogen=="0",]
+env.Ncont.N2<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="2",]
+env.Ncess.N2<-env0[env0$Nadd=="No"&env0$Nitrogen=="2",]
+env.Ncont.N5<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="5",]
+env.Ncess.N5<-env0[env0$Nadd=="No"&env0$Nitrogen=="5",]
+env.Ncont.N10<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="10",]
+env.Ncess.N10<-env0[env0$Nadd=="No"&env0$Nitrogen=="10",]
+env.Ncont.N15<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="15",]
+env.Ncess.N15<-env0[env0$Nadd=="No"&env0$Nitrogen=="15",]
+env.Ncont.N20<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="20",]
+env.Ncess.N20<-env0[env0$Nadd=="No"&env0$Nitrogen=="20",]
+env.Ncont.N50<-env0[env0$Nadd=="Yes"&env0$Nitrogen=="50",]
+env.Ncess.N50<-env0[env0$Nadd=="No"&env0$Nitrogen=="50",]
+##
+set.seed(123)
+B.Ncont.N0.rar<-data.frame(rrarefy(t(B.Ncont.N0),cutoff))
+set.seed(123)
+B.Ncess.N0.rar<-data.frame(rrarefy(t(B.Ncess.N0),cutoff))
+set.seed(123)
+B.Ncont.N2.rar<-data.frame(rrarefy(t(B.Ncont.N2),cutoff))
+set.seed(123)
+B.Ncess.N2.rar<-data.frame(rrarefy(t(B.Ncess.N2),cutoff))
+set.seed(123)
+B.Ncont.N5.rar<-data.frame(rrarefy(t(B.Ncont.N5),cutoff))
+set.seed(123)
+B.Ncess.N5.rar<-data.frame(rrarefy(t(B.Ncess.N5),cutoff))
+set.seed(123)
+B.Ncont.N10.rar<-data.frame(rrarefy(t(B.Ncont.N10),cutoff))
+set.seed(123)
+B.Ncess.N10.rar<-data.frame(rrarefy(t(B.Ncess.N10),cutoff))
+set.seed(123)
+B.Ncont.N15.rar<-data.frame(rrarefy(t(B.Ncont.N15),cutoff))
+set.seed(123)
+B.Ncess.N15.rar<-data.frame(rrarefy(t(B.Ncess.N15),cutoff))
+set.seed(123)
+B.Ncont.N20.rar<-data.frame(rrarefy(t(B.Ncont.N20),cutoff))
+set.seed(123)
+B.Ncess.N20.rar<-data.frame(rrarefy(t(B.Ncess.N20),cutoff))
+set.seed(123)
+B.Ncont.N50.rar<-data.frame(rrarefy(t(B.Ncont.N50),cutoff))
+set.seed(123)
+B.Ncess.N50.rar<-data.frame(rrarefy(t(B.Ncess.N50),cutoff))
+##
+library(beepr)
+beep()
+d1.raw<-B.Ncont.N0.rar
+d2.raw<-B.Ncess.N0.rar
+d3.raw<-B.Ncont.N2.rar
+d4.raw<-B.Ncess.N2.rar
+d5.raw<-B.Ncont.N5.rar
+d6.raw<-B.Ncess.N5.rar
+d7.raw<-B.Ncont.N10.rar
+d8.raw<-B.Ncess.N10.rar
+d9.raw<-B.Ncont.N15.rar
+d10.raw<-B.Ncess.N15.rar
+d11.raw<-B.Ncont.N20.rar
+d12.raw<-B.Ncess.N20.rar
+d13.raw<-B.Ncont.N50.rar
+d14.raw<-B.Ncess.N50.rar
+##
+library(psych)
+d1<-d1.raw
+keep=4
+count=rowSums(d1>0)
+d1=d1[count>=keep,]
+d1<-t(d1)
+co.d1=corr.test(d1, use="pairwise",method="spearman",ci=FALSE)
+r<-as.matrix(co.d1$r)
+co.d1.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d1.rall.df$Nadd<-"Ncont"
+co.d1.rall.df$Nlevel<-"0"
+beep()
+##
+d2<-d2.raw
+keep=4
+count=rowSums(d2>0)
+d2=d2[count>=keep,]
+d2<-t(d2)
+co.d2=corr.test(d2, use="pairwise",method="spearman",ci=FALSE)
+r<-as.matrix(co.d2$r)
+co.d2.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d2.rall.df$Nadd<-"Ncess"
+co.d2.rall.df$Nlevel<-"0"
+##
+d3<-d3.raw
+keep=4
+count=rowSums(d3>0)
+d3=d3[count>=keep,]
+d3<-t(d3)
+co.d3=corr.test(d3, use="pairwise",method="spearman",ci=FALSE)
+r<-as.matrix(co.d3$r)
+co.d3.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d3.rall.df$Nadd<-"Ncont"
+co.d3.rall.df$Nlevel<-"2"
+##
+d4<-d4.raw
+keep=4
+count=rowSums(d4>0)
+d4=d4[count>=keep,]
+d4<-t(d4)
+co.d4=corr.test(d4, use="pairwise",method="spearman",ci=FALSE)
+r<-as.matrix(co.d4$r)
+co.d4.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d4.rall.df$Nadd<-"Ncess"
+co.d4.rall.df$Nlevel<-"2"
+##
+d5<-d5.raw
+keep=4
+count=rowSums(d5>0)
+d5=d5[count>=keep,]
+d5<-t(d5)
+co.d5=corr.test(d5, use="pairwise",method="spearman",
+                ci=FALSE)
+r<-as.matrix(co.d5$r)
+co.d5.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d5.rall.df$Nadd<-"Ncont"
+co.d5.rall.df$Nlevel<-"5"
+##
+d6<-d6.raw
+keep=4
+count=rowSums(d6>0)
+d6=d6[count>=keep,]
+d6<-t(d6)
+co.d6=corr.test(d6, use="pairwise",method="spearman",
+                ci=FALSE)
+r<-as.matrix(co.d6$r)
+co.d6.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d6.rall.df$Nadd<-"Ncess"
+co.d6.rall.df$Nlevel<-"5"
+##
+d7<-d7.raw
+keep=4
+count=rowSums(d7>0)
+d7=d7[count>=keep,]
+d7<-t(d7)
+co.d7=corr.test(d7, use="pairwise",method="spearman",
+                ci=FALSE)
+r<-as.matrix(co.d7$r)
+co.d7.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d7.rall.df$Nadd<-"Ncont"
+co.d7.rall.df$Nlevel<-"10"
+##
+d8<-d8.raw
+keep=4
+count=rowSums(d8>0)
+d8=d8[count>=keep,]
+d8<-t(d8)
+co.d8=corr.test(d8, use="pairwise",method="spearman",
+                ci=FALSE)
+r<-as.matrix(co.d8$r)
+co.d8.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d8.rall.df$Nadd<-"Ncess"
+co.d8.rall.df$Nlevel<-"10"
+##
+d9<-d9.raw
+keep=4
+count=rowSums(d9>0)
+d9=d9[count>=keep,]
+d9<-t(d9)
+co.d9=corr.test(d9, use="pairwise",method="spearman",
+                ci=FALSE)
+r<-as.matrix(co.d9$r)
+co.d9.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                          col=colnames(r)[col(r)[upper.tri(r)]],
+                          r=r[upper.tri(r)])
+co.d9.rall.df$Nadd<-"Ncont"
+co.d9.rall.df$Nlevel<-"15"
+##
+d10<-d10.raw
+keep=4
+count=rowSums(d10>0)
+d10=d10[count>=keep,]
+d10<-t(d10)
+co.d10=corr.test(d10, use="pairwise",method="spearman",
+                 ci=FALSE)
+r<-as.matrix(co.d10$r)
+co.d10.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d10.rall.df$Nadd<-"Ncess"
+co.d10.rall.df$Nlevel<-"15"
+##
+d11<-d11.raw
+keep=4
+count=rowSums(d11>0)
+d11=d11[count>=keep,]
+d11<-t(d11)
+co.d11=corr.test(d11, use="pairwise",method="spearman",
+                 ci=FALSE)
+r<-as.matrix(co.d11$r)
+co.d11.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d11.rall.df$Nadd<-"Ncont"
+co.d11.rall.df$Nlevel<-"20"
+##
+d12<-d12.raw
+keep=4
+count=rowSums(d12>0)
+d12=d12[count>=keep,]
+d12<-t(d12)
+co.d12=corr.test(d12, use="pairwise",method="spearman",
+                 ci=FALSE)
+r<-as.matrix(co.d12$r)
+co.d12.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d12.rall.df$Nadd<-"Ncess"
+co.d12.rall.df$Nlevel<-"20"
+##
+d13<-d13.raw
+keep=4
+count=rowSums(d13>0)
+d13=d13[count>=keep,]
+d13<-t(d13)
+co.d13=corr.test(d13, use="pairwise",method="spearman",
+                 ci=FALSE)
+r<-as.matrix(co.d13$r)
+co.d13.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d13.rall.df$Nadd<-"Ncont"
+co.d13.rall.df$Nlevel<-"50"
+##
+d14<-d14.raw
+keep=4
+count=rowSums(d14>0)
+d14=d14[count>=keep,]
+d14<-t(d14)
+co.d14=corr.test(d14, use="pairwise",method="spearman",
+                 ci=FALSE)
+r<-as.matrix(co.d14$r)
+co.d14.rall.df<-data.frame(row=rownames(r)[row(r)[upper.tri(r)]],
+                           col=colnames(r)[col(r)[upper.tri(r)]],
+                           r=r[upper.tri(r)])
+co.d14.rall.df$Nadd<-"Ncess"
+co.d14.rall.df$Nlevel<-"50"
+co.all<-rbind(co.d1.rall.df,co.d2.rall.df,co.d3.rall.df,
+              co.d4.rall.df,co.d5.rall.df,co.d6.rall.df,
+              co.d7.rall.df,co.d8.rall.df,co.d9.rall.df,
+              co.d10.rall.df,co.d11.rall.df,co.d12.rall.df,
+              co.d13.rall.df,co.d14.rall.df)
+beep()
+
+saveRDS(co.all, "co.all.RDS")
+beep()
+da.Rdis<-readRDS("co.all.RDS")
+#da.Rdis<-read.csv("cor.csv")
+da.Rdis$Nadd<-factor(da.Rdis$Nadd)
+da.Rdis$Nlevel<-factor(da.Rdis$Nlevel,labels = c("0","2","5","10","15","20","50"))
+da.Rdis$intera<-factor(paste(da.Rdis$Nadd,da.Rdis$Nlevel))
+library(splitstackshape)
+diame<-ddply(da.Rdis,.(intera),numcolwise(median))
+dia_med<-cSplit(diame,"intera"," ")
+dia_med$Nadd<-dia_med$intera_1
+dia_med$Nlevel<-dia_med$intera_2
+da.Rdis$r<-round(da.Rdis$r,4)
+da.Rdis$Nlevel<-as.factor(da.Rdis$Nlevel)
+da.Rdis$Nadd<-as.factor(da.Rdis$Nadd)
+dia_med$Nlevel<-as.factor(dia_med$Nlevel)
+dia_med$Nadd<-as.factor(dia_med$Nadd)
+library(colorRamps)
+library(ggplot2)
+library(ggthemes)
+da.Rdis$Nadd <- factor(da.Rdis$Nadd, levels = c("Ncont", "Ncess"))
+col11<-c("darkgrey","chartreuse","deepskyblue","darkviolet","darkorange","#CC0033","darkgoldenrod")
+plot1<-ggplot(da.Rdis,aes(x=r,colour=Nlevel,linetype=Nadd))+
+  geom_density(size=1.5)+
+  scale_colour_manual(values=col11,
+                      labels=c(expression(N0),
+                               expression(N2),
+                               expression(N5),
+                               expression(N10),
+                               expression(N15),
+                               expression(N20),
+                               expression(N50)))+
+  scale_linetype_manual(values=c(3,1),
+                        labels=c(expression(N[cont]),expression(N[cess])))+
+  xlab("Spearman")+ylab("Density")+
+  guides(colour=guide_legend(title = expression(N[level])))+
+  guides(linetype=guide_legend(title = expression(N[add])))+
+  geom_vline(data=dia_med,aes(xintercept=r,colour=Nlevel,linetype=Nadd),size=1.5)+
+  theme_tufte()+
+  theme(text=element_text(size=35,  family="sans"))+
+  theme(strip.text=element_text(size=35),
+        panel.spacing = unit(0,"lines"),
+        legend.title=element_text(colour="black",size=35),
+        legend.text=element_text(colour="black",size=35),
+        axis.text=element_text(colour="black",size=35),
+        axis.title=element_text(colour="black",size=35))
+plot1
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=1.5,linetype = "solid"))
+p1
+ggsave("figs13.Bac_Density.pdf",width = 23.85,height = 17.88)
+```
+

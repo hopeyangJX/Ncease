@@ -1,0 +1,195 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-28"
+---
+
+
+```{r,warning=FALSE,fig.height=11.8,fig.width=19}
+setwd("/Users/yangjianxia/Desktop/npj.code/Fig5e.Figs18")
+library(vegan)
+library(ggplot2)
+library(colorRamps)
+library(ape)
+library(splitstackshape)
+library(reshape2)
+library(stringr)##
+library(colorRamps)
+rm(list = ls())
+ID0 <- read.csv("ID_B_degree.csv", head = T, row.names = 1)
+ID0[is.na(ID0)] = "_"
+ID0<-ID0[str_order(rownames(ID0), numeric = TRUE),] #OTUs按照数字排序
+ID0$OTU.ID<-paste(rownames(ID0),ID0$phylum, ID0$genus, sep="_")
+data0 <- read.csv("otu_degree.csv", head = T, row.names = 1)
+data0<-data.frame(t(data0))
+data0<-data0[str_order(rownames(data0), numeric = TRUE),] #OTUs按照数字排序
+env0 <- read.csv("group_degree.csv", head = T)
+sum(rownames(ID0) != rownames(data0)) 
+sum(env0$OTU.ID != colnames(data0))
+
+opf <- "phylum"     #将"Phylum"定义为opf
+levels(factor(ID0$phylum))
+Flev<-ID0[,opf]  
+fung.lev<-data.frame(aggregate(data0,by=list(Flev) , sum))   #根据opf聚集OTU
+rownames(fung.lev)<-fung.lev[,1]; fung.lev<-fung.lev[,-1]    #将fung.lev的第一列固定为行名
+#data1<-data.frame(t(fung.lev))                               #将fung.lev转置，命名为data1
+#total<-apply(data1, 1, sum)
+#fung.relabu<-data.frame(lapply(data1, function(x) {  x / total  }) ) 
+fung.L<-data.frame(t(fung.lev)) 
+env.L<-env0
+fung.L <- fung.L[,order(-colSums(fung.L))] ## 
+lev<-interaction(env.L$lev)
+fung.L.lev0<-aggregate(fung.L,by=list(lev) , mean) 
+#head(fung.L.lev0)
+fung.L.lev <- fung.L.lev0[, !names(fung.L.lev0) %in% c("p__WPS.2")]
+
+fung.L1<-fung.L.lev[,c(1,2:13)]
+fung.L1 <- melt(fung.L1,id.vars = "Group.1")
+#fung.L1<-cSplit(fung.L1, "Group.1", ":")
+names(fung.L1)<-c("Tre","Bacteria","Abundance")  
+
+fung.L2<-cbind(fung.L.lev[,c(1,14:ncol(fung.L.lev))], fung.L.lev0$p__WPS.2)
+#fung.L2<-fung.L.lev[,c(1,14:ncol(fung.L.lev))]
+fung.L2 <- melt(fung.L2,id.vars = "Group.1")
+#fung.L2<-cSplit(fung.L2, "Group.1", ":")
+names(fung.L2)<-c("Tre","Bacteria","Abundance")
+fung.L2$Bacteria<-"Other"
+fung.bind<-rbind(fung.L1,fung.L2) # combine the domiant and rare OTUs
+
+fung.bind$Bacteria<-factor(fung.bind$Bacteria,levels=c("p__Acidobacteriota","p__Patescibacteria","p__Proteobacteria",
+                                                       "p__Actinobacteriota","p__Chloroflexi","p__Bacteroidota",
+                                                       "p__Firmicutes","p__Gemmatimonadota","p__Planctomycetota",
+                                                       "p__Verrucomicrobiota","p__Myxococcota","p__Methylomirabilota","Other"))
+fung.bind$Bacteria<-factor(fung.bind$Bacteria,labels=c("Acidobacteriota","Patescibacteria","Proteobacteria",
+                                                       "Actinobacteriota","Chloroflexi","Bacteroidota",
+                                                       "Firmicutes","Gemmatimonadota","Planctomycetota",
+                                                       "Verrucomicrobiota","Myxococcota","Methylomirabilota","Others"))
+
+head(fung.bind)
+col11<-c("red","blue","slateblue1","springgreen","steelblue1","tan1","thistle1","tomato","turquoise", "violet", 
+         "yellowgreen","peachpuff", "peru", "pink", "plum2", "purple","wheat", "cornsilk3","cornsilk",
+         "coral4","coral","chocolate4","chocolate","black","chartreuse4","chartreuse","burlywood4","burlywood",
+         "brown4","bisque4","bisque","azure4","azure","aquamarine4","aquamarine","antiquewhite4","antiquewhite",
+         "aliceblue","dodgerblue4","dodgerblue","dimgrey","deepskyblue4", "deepskyblue", "deeppink4", "deeppink","darkviolet",
+         "darkslategray4","darkslategray","darkseagreen4", "darkseagreen", "darksalmon", "darkred", "darkorchid4", "darkorchid",
+         "darkorange4", "darkorange","firebrick","darkgreen","darkgoldenrod4", "darkgoldenrod", "darkcyan","cyan")
+
+# fung.bind$Nadd <- factor(fung.bind$Nadd, levels = c("Ncont", "Ncess"))
+fung.bind$Tre <- factor(fung.bind$Tre, levels=c("N0","Ncont50","Ncess50"),ordered = T)
+fung.bind$Tre <- factor(fung.bind$Tre, labels =c(expression(N0),expression(NcontN50),expression(NcessN50)),
+                        ordered = T)
+plot1<-ggplot(data=fung.bind) +
+  geom_bar(aes(x = Tre, weight=Abundance,fill=Bacteria,position = "stack"))+  
+  labs(x="",y = "Contribution to degree")+
+  scale_fill_manual(values= col11)+
+  theme_bw()+
+  guides(fill=guide_legend(title= "Phylum"))+
+  theme(text=element_text(size=45,  family="sans"))+
+  theme(strip.text = element_text(size = 45),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=45),
+        legend.text = element_text(colour="black", size=45),
+        axis.text.y=element_text(colour="black",size=45),
+        axis.text.x=element_text(colour="black",size=45,face="bold"),
+        axis.title=element_text(colour="black",size=45,face = "bold"))
+#p1<-p1+theme(legend.position = "none")
+plot1
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+ggsave("fig5e_network_degree.pdf",width = 19,height = 11.8)
+
+#ggsave("network_degree.png",width = 19,height = 11.8)
+
+setwd("/Users/yangjianxia/Desktop/npj.data.code/Fig5e.Figs18")
+library(vegan)
+library(ggplot2)
+library(colorRamps)
+library(ape)
+library(splitstackshape)
+library(reshape2)
+library(stringr)##
+library(colorRamps)
+rm(list = ls())
+ID0 <- read.csv("ID_B_degree.csv", head = T, row.names = 1)
+ID0[is.na(ID0)] = "_"
+ID0<-ID0[str_order(rownames(ID0), numeric = TRUE),] #OTUs按照数字排序
+ID0$OTU.ID<-paste(rownames(ID0),ID0$phylum, ID0$genus, sep="_")
+data0 <- read.csv("otu_degree.csv", head = T, row.names = 1)
+data0<-data.frame(t(data0))
+data0<-data0[str_order(rownames(data0), numeric = TRUE),] #OTUs按照数字排序
+env0 <- read.csv("group_degree.csv", head = T)
+sum(rownames(ID0) != rownames(data0)) 
+sum(env0$OTU.ID != colnames(data0))
+
+opf <- "phylum"     #将"Phylum"定义为opf
+levels(factor(ID0$phylum))
+Flev<-ID0[,opf]  
+fung.lev<-data.frame(aggregate(data0,by=list(Flev) , sum))   #根据opf聚集OTU
+rownames(fung.lev)<-fung.lev[,1]; fung.lev<-fung.lev[,-1]    #将fung.lev的第一列固定为行名
+data1<-data.frame(t(fung.lev))                               #将fung.lev转置，命名为data1
+total<-apply(data1, 1, sum)
+fung.relabu<-data.frame(lapply(data1, function(x) {  x / total  }) ) 
+fung.L<-fung.relabu          
+env.L<-env0
+fung.L <- fung.L[,order(-colSums(fung.L))] ## 
+lev<-interaction(env.L$lev)
+fung.L.lev0<-aggregate(fung.L,by=list(lev) , mean) 
+#head(fung.L.lev0)
+fung.L.lev <- fung.L.lev0[, !names(fung.L.lev0) %in% c("p__WPS.2")]
+
+fung.L1<-fung.L.lev[,c(1,2:13)]
+fung.L1 <- melt(fung.L1,id.vars = "Group.1")
+#fung.L1<-cSplit(fung.L1, "Group.1", ":")
+names(fung.L1)<-c("Tre","Bacteria","Relative_Abundance")  
+
+fung.L2<-cbind(fung.L.lev[,c(1,14:ncol(fung.L.lev))], fung.L.lev0$p__WPS.2)
+#fung.L2<-fung.L.lev[,c(1,14:ncol(fung.L.lev))]
+fung.L2 <- melt(fung.L2,id.vars = "Group.1")
+#fung.L2<-cSplit(fung.L2, "Group.1", ":")
+names(fung.L2)<-c("Tre","Bacteria","Relative_Abundance")
+fung.L2$Bacteria<-"Other"
+fung.bind<-rbind(fung.L1,fung.L2) # combine the domiant and rare OTUs
+
+fung.bind$Bacteria<-factor(fung.bind$Bacteria,levels=c("p__Acidobacteriota","p__Patescibacteria","p__Proteobacteria",
+                                                       "p__Actinobacteriota","p__Chloroflexi","p__Bacteroidota",
+                                                       "p__Firmicutes","p__Gemmatimonadota","p__Planctomycetota",
+                                                       "p__Verrucomicrobiota","p__Myxococcota","p__Methylomirabilota","Other"))
+fung.bind$Bacteria<-factor(fung.bind$Bacteria,labels=c("Acidobacteriota","Patescibacteria","Proteobacteria",
+                                                       "Actinobacteriota","Chloroflexi","Bacteroidota",
+                                                       "Firmicutes","Gemmatimonadota","Planctomycetota",
+                                                       "Verrucomicrobiota","Myxococcota","Methylomirabilota","Others"))
+
+head(fung.bind)
+col11<-c("red","blue","slateblue1","springgreen","steelblue1","tan1","thistle1","tomato","turquoise", "violet", 
+         "yellowgreen","peachpuff", "peru", "pink", "plum2", "purple","wheat", "cornsilk3","cornsilk",
+         "coral4","coral","chocolate4","chocolate","black","chartreuse4","chartreuse","burlywood4","burlywood",
+         "brown4","bisque4","bisque","azure4","azure","aquamarine4","aquamarine","antiquewhite4","antiquewhite",
+         "aliceblue","dodgerblue4","dodgerblue","dimgrey","deepskyblue4", "deepskyblue", "deeppink4", "deeppink","darkviolet",
+         "darkslategray4","darkslategray","darkseagreen4", "darkseagreen", "darksalmon", "darkred", "darkorchid4", "darkorchid",
+         "darkorange4", "darkorange","firebrick","darkgreen","darkgoldenrod4", "darkgoldenrod", "darkcyan","cyan")
+
+# fung.bind$Nadd <- factor(fung.bind$Nadd, levels = c("Ncont", "Ncess"))
+fung.bind$Tre <- factor(fung.bind$Tre, levels=c("N0","Ncont50","Ncess50"),ordered = T)
+
+plot1<-ggplot(fung.bind, aes(x = Tre, y = Relative_Abundance, fill=Bacteria)) +
+  geom_bar(stat='identity', position = "fill")+  
+  labs(x="",y = "Relative contribution to degree")+
+  scale_fill_manual(values= col11)+
+  theme_bw()+
+  guides(fill=guide_legend(title= "Phylum"))+
+  theme(text=element_text(size=45,  family="sans"))+
+  theme(strip.text = element_text(size = 45),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=45),
+        legend.text = element_text(colour="black", size=45),
+        axis.text.y=element_text(colour="black",size=45),
+        axis.text.x=element_text(colour="black",size=45,face="bold"),
+        axis.title=element_text(colour="black",size=45,face = "bold"))
+#p1<-p1+theme(legend.position = "none")
+plot1
+p1<-plot1+theme(panel.border = element_rect(fill = NA,color = "black",size=3.5,linetype = "solid"))
+p1
+ggsave("figs18_relative_network_degree.pdf",width = 19,height = 11.8)
+#ggsave("network_degree.png",width = 19,height = 11.8)
+```
+
