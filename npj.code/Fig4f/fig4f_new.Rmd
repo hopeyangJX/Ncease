@@ -1,0 +1,48 @@
+---
+title: "fig4f_sem"
+output: html_document
+date: "2024-11-04"
+---
+
+
+
+```{r cars}
+rm(list=ls())
+setwd("/Users/yangjianxia/Documents/code_data/npj.data.code/Fig4f")
+library(piecewiseSEM)
+library(nlme)
+library(lavaan)
+library(readxl)
+library(dplyr)
+data<-read_excel("SEM.xlsx",sheet = "Nadd")
+data$Zrate<-scale(data$rate)
+data$ZNadd<-scale(data$Nadd)
+data$ZN<-scale(data$N)
+data$ZIN<-scale(data$IN)
+data$ZpH<-scale(data$pH)
+data$ZOTU.richness<-scale(data$OTU.richness)
+data$ZKO.richness<-scale(data$KO.richness)
+data$ZPlant.richness<-scale(data$Plant.richness)
+data$ZPlant.biomass<-scale(data$Plant.biomass)
+data$ZCN<-scale(data$CN.ratio)
+data$ZMn<-scale(data$Mn)
+data$ZCu<-scale(data$Cu)
+data$Zlgt<-scale(data$lgt)
+data$Zlgtko<-scale(data$lgtko)
+data$Zvirus<-scale(data$virus)
+data$ZAGS<-scale(data$AGS)
+data$Zlgtrate<-scale(data$lgtrate)
+write.csv(data,"data1.csv")
+data<-read.csv("data1.csv",row.names = 1)
+model1<-psem(lme(ZIN~ZN+ZNadd,random=~1|Block,data),
+             lme(ZpH~ZN+ZNadd,random=~1|Block,data),
+             lme(ZPlant.biomass~ZN+ZNadd+ZIN+ZpH,random=~1|Block,data),
+             lme(ZPlant.richness~ZN+ZNadd+ZPlant.biomass+ZIN+ZpH,random=~1|Block,data),
+             lme(Zlgtko~ZpH+ZIN+ZPlant.biomass+ZPlant.richness+ZN+ZNadd,random=~1|Block,data),
+             lme(ZAGS~ZN+ZNadd+ZIN+ZpH+Zlgtko,random=~1|Block,data),
+             lme(Zrate~ZN+ZIN+ZpH+ZPlant.biomass+ZPlant.richness+ZNadd+Zlgtko+ZAGS,random=~1|Block,data),
+             data=data)
+summary(model1)
+```
+
+
